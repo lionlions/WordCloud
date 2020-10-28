@@ -16,9 +16,10 @@ class MainActivity : AppCompatActivity() {
     private val TAG: String = javaClass.simpleName
     private var mRootRight: Int = -1
     private var mRootBottom: Int = -1
-    private val KEY_X: String = "x"
-    private val KEY_Y: String = "y"
-    private val mRootXYArray: MutableList<MutableMap<String, Int>> = mutableListOf()
+//    private val KEY_X: String = "x"
+//    private val KEY_Y: String = "y"
+//    private val mRootXYArray: MutableList<MutableMap<String, Int>> = mutableListOf()
+    private val mRootXYArray: MutableList<String> = mutableListOf()
     private val mWordCloudTextViewList: MutableList<TextView> = mutableListOf()
     private val mColorList: MutableList<Int> = mutableListOf(
         android.R.color.background_dark,
@@ -30,7 +31,10 @@ class MainActivity : AppCompatActivity() {
         android.R.color.holo_purple
     )
     private val mWordCloudTextSizeList: MutableList<Int> = mutableListOf(
-        42, 40, 38, 36, 34, 30, 26, 22, 20, 16, 12, 8
+        40, 38, 36, 34, 30, 26, 22, 20, 16, 12
+    )
+    private val mWordCloudTextSizePercentage: MutableList<Int> = mutableListOf(
+        0, 3, 7, 12, 18, 25, 36, 49, 64, 81
     )
     private val mWordCloudTextRotateDegreeList: MutableList<Int> = mutableListOf(
         0, 90, 270
@@ -55,7 +59,8 @@ class MainActivity : AppCompatActivity() {
                 mRootBottom = vRoot.height
                 for (i in 0 .. vRoot.width){
                     for (j in 0 .. vRoot.height){
-                        mRootXYArray.add(mutableMapOf(KEY_X to i, KEY_Y to j))
+//                        mRootXYArray.add(mutableMapOf(KEY_X to i, KEY_Y to j))
+                        mRootXYArray.add("$i,$j")
                     }
                 }
                 Log.i(TAG, "mRootXYArray.size: ${mRootXYArray.size}")
@@ -125,9 +130,11 @@ class MainActivity : AppCompatActivity() {
 //                    for (i in textView.left .. textView.right){
 //                        for (j in textView.top .. textView.bottom){
 //                            mRootXYArray.filter {
-//                                it[KEY_X]==i && it[KEY_Y]==j
+////                                it[KEY_X]==i && it[KEY_Y]==j
+//                                it.split(",")[0].toInt()==i && it.split(",")[1].toInt()==j
 //                            }.apply {
 //                                mRootXYArray.removeAll(this)
+//                                Log.w(TAG, "mRootXYArray.size ${mRootXYArray.size}")
 //                            }
 //                        }
 //                    }
@@ -159,9 +166,11 @@ class MainActivity : AppCompatActivity() {
     fun setNextTextView(){
         Log.v(TAG, "===== setNextTextView =====")
         if(mRootXYArray.size>0){
-            val nextXYMap: MutableMap<*, *> = getRandomItemInList(mRootXYArray) as MutableMap<*, *>
-            val nextX: Int = nextXYMap[KEY_X] as Int
-            val nextY: Int = nextXYMap[KEY_Y] as Int
+            val nextXYMap: String = getRandomItemInList(mRootXYArray) as String
+//            val nextX: Int = nextXYMap[KEY_X] as Int
+//            val nextY: Int = nextXYMap[KEY_Y] as Int
+            val nextX: Int = nextXYMap.split(",")[0].toInt()
+            val nextY: Int = nextXYMap.split(",")[1].toInt()
             setTextView(nextX, nextY)
         }
     }
@@ -212,59 +221,68 @@ class MainActivity : AppCompatActivity() {
 
             if(isXOverLapping && isYOverLapping){
                 Log.i(TAG, "重疊了，計算重覆面積")
-                overLapWidth = if(item.left <= textView.left){
-                    Log.i(TAG, "比對的 left <= 目前 left (目前 TextView 在比對 TextView 的右手邊，或兩者一起置左)")
-                    if(item.right <= textView.right){
-                        Log.i(TAG, "比對的 right <= 目前 right")
-                        item.right - textView.left
-                    }else{
-                        Log.i(TAG, "比對的 right > 目前 right")
-                        textView.width
-                    }
-                }else{
-                    Log.i(TAG, "比對的 left > 目前 left (目前 TextView 在比對 TextView 的左手邊)")
-                    if(item.right <= textView.right){
-                        Log.i(TAG, "比對的 right <= 目前 right")
-                        item.width
-                    }else{
-                        Log.i(TAG, "比對的 right > 目前 right")
-                        textView.right - item.left
-                    }
-                }
+                return true
 
-                overLapHeight = if(item.top <= textView.top){
-                    Log.i(TAG, "比對的 top <= 目前 top (目前 TextView 在比對 TextView 的下方，或兩者等高)")
-                    if(item.bottom <= textView.bottom){
-                        Log.i(TAG, "比對的 bottom <= 目前 bottom")
-                        item.bottom - textView.top
-                    }else{
-                        Log.i(TAG, "比對的 bottom > 目前 bottom")
-                        textView.height
-                    }
-                }else{
-                    Log.i(TAG, "比對的 top > 目前 top (目前 TextView 在比對 TextView 的上方)")
-                    if(item.bottom <= textView.bottom){
-                        Log.i(TAG, "比對的 bottom <= 目前 bottom")
-                        item.height
-                    }else{
-                        Log.i(TAG, "比對的 bottom > 目前 bottom")
-                        textView.bottom - item.top
-                    }
-                }
-
-                Log.e(TAG, "overLapWidth: $overLapWidth")
-                Log.e(TAG, "overLapHeight: $overLapHeight")
-
-                val overLapArea: Int = overLapWidth * overLapHeight
-                val itemArea: Int = item.width * item.height
-                Log.e(TAG, "overLapArea: $overLapArea")
-                Log.e(TAG, "itemArea: $itemArea")
-
-                if(overLapArea >= itemArea / 15) return true
+//                overLapWidth = if(item.left <= textView.left){
+//                    Log.i(TAG, "比對的 left <= 目前 left (目前 TextView 在比對 TextView 的右手邊，或兩者一起置左)")
+//                    if(item.right <= textView.right){
+//                        Log.i(TAG, "比對的 right <= 目前 right")
+//                        item.right - textView.left
+//                    }else{
+//                        Log.i(TAG, "比對的 right > 目前 right")
+//                        textView.width
+//                    }
+//                }else{
+//                    Log.i(TAG, "比對的 left > 目前 left (目前 TextView 在比對 TextView 的左手邊)")
+//                    if(item.right <= textView.right){
+//                        Log.i(TAG, "比對的 right <= 目前 right")
+//                        item.width
+//                    }else{
+//                        Log.i(TAG, "比對的 right > 目前 right")
+//                        textView.right - item.left
+//                    }
+//                }
+//
+//                overLapHeight = if(item.top <= textView.top){
+//                    Log.i(TAG, "比對的 top <= 目前 top (目前 TextView 在比對 TextView 的下方，或兩者等高)")
+//                    if(item.bottom <= textView.bottom){
+//                        Log.i(TAG, "比對的 bottom <= 目前 bottom")
+//                        item.bottom - textView.top
+//                    }else{
+//                        Log.i(TAG, "比對的 bottom > 目前 bottom")
+//                        textView.height
+//                    }
+//                }else{
+//                    Log.i(TAG, "比對的 top > 目前 top (目前 TextView 在比對 TextView 的上方)")
+//                    if(item.bottom <= textView.bottom){
+//                        Log.i(TAG, "比對的 bottom <= 目前 bottom")
+//                        item.height
+//                    }else{
+//                        Log.i(TAG, "比對的 bottom > 目前 bottom")
+//                        textView.bottom - item.top
+//                    }
+//                }
+//
+//                Log.e(TAG, "overLapWidth: $overLapWidth")
+//                Log.e(TAG, "overLapHeight: $overLapHeight")
+//
+//                val overLapArea: Int = overLapWidth * overLapHeight
+//                val itemArea: Int = item.width * item.height
+//                Log.e(TAG, "overLapArea: $overLapArea")
+//                Log.e(TAG, "itemArea: $itemArea")
+//
+//                if(overLapArea >= itemArea / 15) return true
 
             }
 
         }
         return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if(mRootXYArray.size>0){
+            mRootXYArray.clear()
+        }
     }
 }
