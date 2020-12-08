@@ -31,10 +31,10 @@ class MainActivity : AppCompatActivity() {
         android.R.color.holo_purple
     )
     private val mWordCloudTextSizeList: MutableList<Int> = mutableListOf(
-        40, 38, 36, 34, 30, 26, 22, 20, 16, 12
+        40, 38, 34, 32, 28, 24, 20, 16, 12, 8
     )
     private val mWordCloudTextSizePercentage: MutableList<Int> = mutableListOf(
-        0, 3, 7, 12, 18, 25, 36, 49, 64, 81
+        0, 2, 4, 6, 8, 16, 24, 34, 46, 72
     )
     private val mWordCloudTextRotateDegreeList: MutableList<Int> = mutableListOf(
         0, 90, 270
@@ -152,13 +152,18 @@ class MainActivity : AppCompatActivity() {
 
     fun getTextSize(): Float{
         val contentSize = mWordCloudTextList.size
-        val range = contentSize / mWordCloudTextSizeList.size
-        val index = mWordCloudTextViewDownCount / range
-        val size = mWordCloudTextSizeList[index]
+        val percentage: Float = (mWordCloudTextViewDownCount.toFloat() / contentSize) * 100
+        var size: Int = -1
+        for((index, percentageInList) in mWordCloudTextSizePercentage.withIndex()){
+            if(index==mWordCloudTextSizePercentage.size-1
+                || percentage>=percentageInList && percentage<mWordCloudTextSizePercentage[index+1]){
+                size = mWordCloudTextSizeList[index]
+                break
+            }
+        }
         Log.w(TAG, "mWordCloudTextViewDownCount: $mWordCloudTextViewDownCount")
-        Log.w(TAG, "mWordCloudTextSizeList.size: ${mWordCloudTextSizeList.size}")
-        Log.w(TAG, "range: $range")
-        Log.w(TAG, "index: $index")
+        Log.w(TAG, "contentSize: $contentSize")
+        Log.w(TAG, "percentage: $percentage")
         Log.w(TAG, "size: $size")
         return size.toFloat()
     }
